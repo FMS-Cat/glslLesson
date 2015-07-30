@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>GLSL道場</title>
+		<style>
+			body {
+				margin : 0;
+				padding : 0;
+				overflow : hidden;
+				-moz-user-select : none;
+				-khtml-user-select : none;
+				-webkit-user-select : none;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="ace/ace.js"></script>
+		<script src="ace/mode-glsl.js"></script>
+		<script src="ace/theme-monokai.js"></script>
+		<script src="src/Storage.js"></script>
+		<script src="src/requestText.js"></script>
+		<script src="src/ItaPoly.js"></script>
+		<script src="src/Title.js"></script>
+		<script src="src/MouseDescription.js"></script>
+		<script src="src/LessonMap.js"></script>
+		<script src="src/LessonMap.Map.js"></script>
+		<script src="src/LessonMap.Lesson.js"></script>
+		<script>
+			var lesson = location.href.split( '#' )[ 1 ];
+
+			if( lesson ){
+				var itaPoly = new ItaPoly( 512, 512 );
+				itaPoly.canvas.style.position = 'absolute';
+				document.body.appendChild( itaPoly.canvas );
+
+				var article = document.createElement( 'div' );
+				article.style.position = 'absolute';
+				article.style.padding = '4px';
+				article.style.background = '#333333';
+				article.style.color = '#dddddd';
+				document.body.appendChild( article );
+
+				var editorDiv = document.createElement( 'div' );
+				editorDiv.id = 'editor';
+				editorDiv.style.position = 'absolute';
+				document.body.appendChild( editorDiv );
+
+				var log = document.createElement( 'div' );
+				log.style.position = 'absolute';
+				log.style.padding = '4px';
+				log.style.font = '500 12px/1.0 monaco';
+				log.style.background = '#111111';
+				document.body.appendChild( log );
+
+				var update = function(){
+					if( itaPoly.ready ){
+						itaPoly.update();
+					}
+					requestAnimationFrame( update );
+				}
+				update();
+
+				var resize = function(){
+					var w = window.innerWidth;
+					var h = window.innerHeight;
+
+					if( h / w < 4 / 5 ){
+						itaPoly.canvas.style.left = '0px';
+						itaPoly.canvas.style.top = '0px';
+						itaPoly.canvas.style.width = h / 2 + 'px';
+						itaPoly.canvas.style.height = h / 2 + 'px';
+
+						article.style.left = '0px';
+						article.style.top = h / 2 + 'px';
+						article.style.width = h / 2 - 8 + 'px';
+						article.style.height = h / 2 - 8 + 'px';
+
+						editorDiv.style.left = h / 2 + 'px';
+						editorDiv.style.top = '0px';
+						editorDiv.style.width = w - h / 2 + 'px';
+						editorDiv.style.height = h / 4 * 3 + 'px';
+
+						log.style.left = h / 2 + 'px';
+						log.style.top = h / 4 * 3 + 'px';
+						log.style.width = w - h / 2 - 8 + 'px';
+						log.style.height = h / 4 - 8 + 'px';
+					}else{
+						itaPoly.canvas.style.left = '0px';
+						itaPoly.canvas.style.top = '0px';
+						itaPoly.canvas.style.width = w / 5 * 2 + 'px';
+						itaPoly.canvas.style.height = w / 5 * 2 + 'px';
+
+						article.style.left = '0px';
+						article.style.top = w / 5 * 2 + 'px';
+						article.style.width = w / 5 * 2 - 8 + 'px';
+						article.style.height = h - w / 5 * 2 - 8 + 'px';
+
+						editorDiv.style.left = w / 5 * 2 + 'px';
+						editorDiv.style.top = '0px';
+						editorDiv.style.width = w / 5 * 3 + 'px';
+						editorDiv.style.height = h / 4 * 3 + 'px';
+
+						log.style.left = w / 5 * 2 + 'px';
+						log.style.top = h / 4 * 3 + 'px';
+						log.style.width = w / 5 * 3 - 8 + 'px';
+						log.style.height = h / 4 - 8 + 'px';
+					}
+				}
+				window.onresize = resize;
+				resize();
+
+				var editor = ace.edit( 'editor' );
+				editor.setTheme( 'ace/theme/monokai' );
+		    editor.getSession().setMode( 'ace/mode/glsl' );
+				editor.getSession().setTabSize( 2 );
+				editor.getSession().setUseSoftTabs( true );
+				editor.getSession().setValue( '#ifdef GL_ES\nprecision mediump float;\n#endif\n\nvoid main(){\n  gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );\n}' );
+
+				var createProgram = function(){
+					itaPoly.createProgram(
+						editor.getValue(),
+						function( _callback ){
+							log.style.color = '#00ff66';
+							log.innerText = 'yay';
+						},
+						function( _error ){
+							console.log( _error);
+							log.style.color = '#ff0066';
+							log.innerText = _error;
+						}
+					);
+				}
+				createProgram();
+				editor.getSession().on( 'change', function(){
+					createProgram();
+				} );
+
+				requestText( 'lessons/' + lesson + '.frag', function( _frag ){
+					editor.getSession().setValue( _frag );
+					createProgram();
+				} );
+
+				requestText( 'lessons/' + lesson + '.md', function( _md ){
+					article.innerHTML = _md;
+				} );
+			}else{
+				var map = new LessonMap.Map();
+				map.loadLesson( 'hello_world', function( _lesson ){
+					map.addRoot( _lesson );
+					map.setTarget( _lesson );
+				} );
+
+				var title = new Title();
+				title.setText( '<span style="font-size:24px">GLSL道場</span><br />@FMS_Cat' );
+
+				var update = function(){
+					map.update();
+					requestAnimationFrame( update );
+				}
+				update();
+
+				window.addEventListener( 'mousemove', function( _e ){
+					map.mousemove( _e );
+				} );
+
+				window.addEventListener( 'mousedown', function( _e ){
+					map.mousedown( _e );
+				} );
+
+				window.addEventListener( 'mouseup', function( _e ){
+					map.mouseup( _e );
+				} );
+			}
+		</script>
+	</body>
+</html>
