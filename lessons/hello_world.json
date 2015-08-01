@@ -2,6 +2,7 @@
   "title" : "Hello world !",
   "description" : "GLSL Fragment Shader 最初の一歩",
   "linksName" : [
-    "uniform"
+    "uniform",
+    "vecJoy"
   ]
 }

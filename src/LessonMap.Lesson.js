@@ -137,7 +137,16 @@ LessonMap.Lesson.prototype.update = function( _lessons ){
   // handle mouse
   if( it.selected ){
     if( it.map.mouse.down ){
-      if( it.map.mouse.downTime - it.map.mouse.pDownTime < 400 ){
+      if( it.doneSelected ){
+        if( it.done ){
+          it.done = false;
+          it.unlink();
+        }else{
+          it.done = true;
+          it.link();
+        }
+        it.map.storage.set( it.name + '_done', it.done );
+      }else{
         it.map.target = it;
 
         if( typeof it.onclick === 'function' ){
@@ -148,15 +157,6 @@ LessonMap.Lesson.prototype.update = function( _lessons ){
         a.href = location.href + '#' + it.name;
         a.target = '_blank';
         a.click();
-      }else if( it.doneSelected ){
-        if( it.done ){
-          it.done = false;
-          it.unlink();
-        }else{
-          it.done = true;
-          it.link();
-        }
-        it.map.storage.set( it.name + '_done', it.done );
       }
     }
   }

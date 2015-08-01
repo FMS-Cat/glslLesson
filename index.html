@@ -13,15 +13,52 @@
 				-khtml-user-select : none;
 				-webkit-user-select : none;
 			}
+
+			#article {
+				line-height : 1.3;
+				font-size : 12px;
+			}
+
+			#article ul {
+				padding-left : 20px;
+			}
+
+			#article code {
+				font-family : Monaco, monospace;
+				font-size : 10px;
+				border : solid 1px #777777;
+				background : #444444;
+				border-radius : 2px;
+			}
+
+			#article .lang-glsl {
+				padding : 1px;
+				display : block;
+			}
+
+			#article strong {
+				background : #bb0044;
+				color : #ffffff;
+			}
+
+			#article strong code {
+				background : #bb0044;
+				border : solid 1px #ff5599;
+			}
+
+			#article a {
+				color : #ffaa88;
+			}
 		</style>
 	</head>
 	<body>
-		<script src="ace/ace.js"></script>
-		<script src="ace/mode-glsl.js"></script>
-		<script src="ace/theme-monokai.js"></script>
+		<script src="lib/ace/ace.js"></script>
+		<script src="lib/ace/mode-glsl.js"></script>
+		<script src="lib/ace/theme-monokai.js"></script>
+		<script src="lib/ItaPoly.js"></script>
+		<script src="lib/marked.js"></script>
 		<script src="src/Storage.js"></script>
 		<script src="src/requestText.js"></script>
-		<script src="src/ItaPoly.js"></script>
 		<script src="src/Title.js"></script>
 		<script src="src/MouseDescription.js"></script>
 		<script src="src/LessonMap.js"></script>
@@ -31,13 +68,24 @@
 			var lesson = location.href.split( '#' )[ 1 ];
 
 			if( lesson ){
+				var title = document.createElement( 'div' );
+				title.style.position = 'absolute';
+				title.style.padding = '4px';
+				title.style.fontSize = '12px';
+				title.style.lineHeight = '1.2';
+				title.style.background = '#444444';
+				title.style.color = '#dddddd';
+				document.body.appendChild( title );
+
 				var itaPoly = new ItaPoly( 512, 512 );
 				itaPoly.canvas.style.position = 'absolute';
 				document.body.appendChild( itaPoly.canvas );
 
 				var article = document.createElement( 'div' );
+				article.id = 'article';
 				article.style.position = 'absolute';
 				article.style.padding = '4px';
+				article.style.overflow = 'scroll';
 				article.style.background = '#333333';
 				article.style.color = '#dddddd';
 				document.body.appendChild( article );
@@ -50,57 +98,60 @@
 				var log = document.createElement( 'div' );
 				log.style.position = 'absolute';
 				log.style.padding = '4px';
-				log.style.font = '500 12px/1.0 monaco';
+				log.style.font = '500 12px/1.0 monaco, monospace';
+				article.style.overflow = 'scroll';
 				log.style.background = '#111111';
 				document.body.appendChild( log );
-
-				var update = function(){
-					if( itaPoly.ready ){
-						itaPoly.update();
-					}
-					requestAnimationFrame( update );
-				}
-				update();
 
 				var resize = function(){
 					var w = window.innerWidth;
 					var h = window.innerHeight;
 
 					if( h / w < 4 / 5 ){
+						title.style.left = '0px';
+						title.style.top = '0px';
+						title.style.width = w - 8 + 'px';
+						title.style.height = 30 - 8 + 'px';
+
 						itaPoly.canvas.style.left = '0px';
-						itaPoly.canvas.style.top = '0px';
+						itaPoly.canvas.style.top = '30px';
 						itaPoly.canvas.style.width = h / 2 + 'px';
 						itaPoly.canvas.style.height = h / 2 + 'px';
 
 						article.style.left = '0px';
-						article.style.top = h / 2 + 'px';
+						article.style.top = h / 2 + 30 + 'px';
 						article.style.width = h / 2 - 8 + 'px';
-						article.style.height = h / 2 - 8 + 'px';
+						article.style.height = h / 2 - 30 - 8 + 'px';
 
 						editorDiv.style.left = h / 2 + 'px';
-						editorDiv.style.top = '0px';
+						editorDiv.style.top = '30px';
 						editorDiv.style.width = w - h / 2 + 'px';
-						editorDiv.style.height = h / 4 * 3 + 'px';
+						editorDiv.style.height = h / 4 * 3 - 30 + 'px';
 
 						log.style.left = h / 2 + 'px';
 						log.style.top = h / 4 * 3 + 'px';
 						log.style.width = w - h / 2 - 8 + 'px';
 						log.style.height = h / 4 - 8 + 'px';
 					}else{
+						title.style.left = '0px';
+						title.style.top = '0px';
+						title.style.width = w - 8 + 'px';
+						title.style.height = 30 - 8 + 'px';
+
 						itaPoly.canvas.style.left = '0px';
-						itaPoly.canvas.style.top = '0px';
+						itaPoly.canvas.style.top = '30px';
 						itaPoly.canvas.style.width = w / 5 * 2 + 'px';
 						itaPoly.canvas.style.height = w / 5 * 2 + 'px';
 
 						article.style.left = '0px';
-						article.style.top = w / 5 * 2 + 'px';
+						article.style.top = w / 5 * 2 + 30 + 'px';
 						article.style.width = w / 5 * 2 - 8 + 'px';
-						article.style.height = h - w / 5 * 2 - 8 + 'px';
+						article.style.height = h - w / 5 * 2 - 30 - 8 + 'px';
 
 						editorDiv.style.left = w / 5 * 2 + 'px';
-						editorDiv.style.top = '0px';
+						editorDiv.style.top = '30px';
 						editorDiv.style.width = w / 5 * 3 + 'px';
-						editorDiv.style.height = h / 4 * 3 + 'px';
+						editorDiv.style.height = h / 4 * 3 - 30 + 'px';
 
 						log.style.left = w / 5 * 2 + 'px';
 						log.style.top = h / 4 * 3 + 'px';
@@ -124,6 +175,7 @@
 						function( _callback ){
 							log.style.color = '#00ff66';
 							log.innerText = 'yay';
+							itaPoly.beginTime = ( +new Date() );
 						},
 						function( _error ){
 							console.log( _error);
@@ -133,17 +185,49 @@
 					);
 				}
 				createProgram();
+
+				var lastChange = 0;
+				var compiled = false;
+				var compileTimer = function(){
+					if( !compiled ){
+						var t = ( +new Date() ) - lastChange;
+						if( 500 < t ){
+							compiled = true;
+							createProgram();
+						}else{
+							log.style.color = '#888888';
+							log.innerText = 'compile after ' + ( ( 500 - t ) * 0.001 ).toFixed( 3 ) + ' sec';
+						}
+					}
+				};
+
 				editor.getSession().on( 'change', function(){
-					createProgram();
+					compiled = false;
+					lastChange = ( +new Date() );
 				} );
+
+				var update = function(){
+					if( itaPoly.ready ){
+						itaPoly.update();
+					}
+					compileTimer();
+					requestAnimationFrame( update );
+				}
+				update();
 
 				requestText( 'lessons/' + lesson + '.frag', function( _frag ){
 					editor.getSession().setValue( _frag );
 					createProgram();
 				} );
 
+				requestText( 'lessons/' + lesson + '.json', function( _json ){
+					var json = JSON.parse( _json );
+					title.innerHTML = '<span style="font-size : 18px">' + json.title + '</span> - ' + json.description;
+					document.title = 'GLSL道場 - ' + json.title;
+				} );
+
 				requestText( 'lessons/' + lesson + '.md', function( _md ){
-					article.innerHTML = _md;
+					article.innerHTML = marked( _md );
 				} );
 			}else{
 				var map = new LessonMap.Map();
